@@ -1,0 +1,26 @@
+model User {
+  user_id   Int      @id
+  username  String   @unique
+  password  String
+  chats     Chat[]
+}
+
+model Chat {
+  chat_id    Int       @id
+  user_id    Int
+  title      String
+  created_at DateTime  @default(now())
+  messages   Message[]
+}
+
+model Message {
+  mesg_id Int    @id
+  chat_id Int
+  message String
+  role    Role
+}
+
+enum Role {
+  user
+  bot
+}
