@@ -1,1 +1,2 @@
 - Adding GitHub pages CI/CD.
+- Optimizing time-complexity.
