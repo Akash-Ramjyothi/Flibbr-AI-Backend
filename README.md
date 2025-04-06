@@ -3,3 +3,4 @@
 - Fixing conditional statements.
 - Improved modal pop-up screen.
 - Validating output compiled.
+- Initializing Jest.
