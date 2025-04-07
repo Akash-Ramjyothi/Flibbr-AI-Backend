@@ -4,3 +4,4 @@
 - Improved modal pop-up screen.
 - Validating output compiled.
 - Initializing Jest.
+- Increasing code-coverage.
