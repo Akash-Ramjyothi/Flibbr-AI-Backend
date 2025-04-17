@@ -14,3 +14,4 @@
 - Removing unecessary explicit conditions.
 - Developing validation flow.
 - Optimizing re-usability in coponents.
+- Removing unecessary explicit conditions.
