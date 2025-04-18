@@ -15,3 +15,4 @@
 - Developing validation flow.
 - Optimizing re-usability in coponents.
 - Removing unecessary explicit conditions.
+- Writing unit-tests.
