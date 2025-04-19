@@ -16,3 +16,4 @@
 - Optimizing re-usability in coponents.
 - Removing unecessary explicit conditions.
 - Writing unit-tests.
+- Covering index.tsx file.
