@@ -18,3 +18,4 @@
 - Writing unit-tests.
 - Covering index.tsx file.
 - Creating multiple .test files.
+- Increasing code-coverage further.
