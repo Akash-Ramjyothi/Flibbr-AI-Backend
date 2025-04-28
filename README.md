@@ -25,3 +25,4 @@
 - Optimizing re-usability in coponents.
 - Removing inexecutable cases.
 - Debugging issues.
+- Optimizing time-complexity.
