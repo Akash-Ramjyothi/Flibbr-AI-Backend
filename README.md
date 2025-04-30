@@ -27,3 +27,4 @@
 - Debugging issues.
 - Optimizing time-complexity.
 - Developing special flow.
+- Removing inexecutable cases.
