@@ -1,4 +1,4 @@
-Adding GitHub pages CI/CD.
+- Adding GitHub pages CI/CD.
 Optimizing time-complexity.
 Fixing conditional statements.
 Improved modal pop-up screen.
