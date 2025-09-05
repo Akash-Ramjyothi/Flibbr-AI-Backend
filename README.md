@@ -1,5 +1,5 @@
 - Adding GitHub pages CI/CD.
-Optimizing time-complexity.
+- Optimizing time-complexity.
 Fixing conditional statements.
 Improved modal pop-up screen.
 Validating output compiled.
