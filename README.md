@@ -3,7 +3,7 @@
 - Fixing conditional statements.
 - Improved modal pop-up screen.
 - Validating output compiled.
-Initializing Jest.
+- Initializing Jest.
 Increasing code-coverage.
 Validating output compiled.
 Developing special flow.
