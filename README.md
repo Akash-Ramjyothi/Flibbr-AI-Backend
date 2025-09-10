@@ -4,7 +4,7 @@
 - Improved modal pop-up screen.
 - Validating output compiled.
 - Initializing Jest.
-Increasing code-coverage.
+- Increasing code-coverage.
 Validating output compiled.
 Developing special flow.
 Initiated Jest unit-testing.
