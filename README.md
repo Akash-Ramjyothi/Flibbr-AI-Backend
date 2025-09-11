@@ -5,7 +5,7 @@
 - Validating output compiled.
 - Initializing Jest.
 - Increasing code-coverage.
-Validating output compiled.
+- Validating output compiled.
 Developing special flow.
 Initiated Jest unit-testing.
 Developing special flow.
