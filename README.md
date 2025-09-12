@@ -6,7 +6,7 @@
 - Initializing Jest.
 - Increasing code-coverage.
 - Validating output compiled.
-Developing special flow.
+- Developing special flow.
 Initiated Jest unit-testing.
 Developing special flow.
 Removing inexecutable cases.
