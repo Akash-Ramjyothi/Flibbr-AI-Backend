@@ -7,7 +7,7 @@
 - Increasing code-coverage.
 - Validating output compiled.
 - Developing special flow.
-Initiated Jest unit-testing.
+- Initiated Jest unit-testing.
 Developing special flow.
 Removing inexecutable cases.
 Increasing code-coverage.
