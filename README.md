@@ -8,7 +8,7 @@
 - Validating output compiled.
 - Developing special flow.
 - Initiated Jest unit-testing.
-Developing special flow.
+- Developing special flow.
 Removing inexecutable cases.
 Increasing code-coverage.
 Removing unecessary explicit conditions.
