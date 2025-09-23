@@ -9,7 +9,7 @@
 - Developing special flow.
 - Initiated Jest unit-testing.
 - Developing special flow.
-Removing inexecutable cases.
+- Removing inexecutable cases.
 Increasing code-coverage.
 Removing unecessary explicit conditions.
 Developing validation flow.
