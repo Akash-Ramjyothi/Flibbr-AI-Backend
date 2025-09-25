@@ -10,7 +10,7 @@
 - Initiated Jest unit-testing.
 - Developing special flow.
 - Removing inexecutable cases.
-Increasing code-coverage.
+- Increasing code-coverage.
 Removing unecessary explicit conditions.
 Developing validation flow.
 Optimizing re-usability in coponents.
