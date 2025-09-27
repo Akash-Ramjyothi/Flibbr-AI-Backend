@@ -11,7 +11,7 @@
 - Developing special flow.
 - Removing inexecutable cases.
 - Increasing code-coverage.
-Removing unecessary explicit conditions.
+- Removing unecessary explicit conditions.
 Developing validation flow.
 Optimizing re-usability in coponents.
 Removing unecessary explicit conditions.
