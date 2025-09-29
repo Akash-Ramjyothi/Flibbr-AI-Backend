@@ -12,7 +12,7 @@
 - Removing inexecutable cases.
 - Increasing code-coverage.
 - Removing unecessary explicit conditions.
-Developing validation flow.
+- Developing validation flow.
 Optimizing re-usability in coponents.
 Removing unecessary explicit conditions.
 Writing unit-tests.
