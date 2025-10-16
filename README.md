@@ -15,7 +15,7 @@
 - Developing validation flow.
 - Optimizing re-usability in coponents.
 - Removing unecessary explicit conditions.
-Writing unit-tests.
+- Writing unit-tests.
 Covering index.tsx file.
 Creating multiple .test files.
 Increasing code-coverage further.
