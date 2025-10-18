@@ -17,7 +17,7 @@
 - Removing unecessary explicit conditions.
 - Writing unit-tests.
 - Covering index.tsx file.
-Creating multiple .test files.
+- Creating multiple .test files.
 Increasing code-coverage further.
 Mocking asynchronous blocks.
 Creating multiple .test files.
