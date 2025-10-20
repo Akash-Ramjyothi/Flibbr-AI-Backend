@@ -19,7 +19,7 @@
 - Covering index.tsx file.
 - Creating multiple .test files.
 - Increasing code-coverage further.
-Mocking asynchronous blocks.
+- Mocking asynchronous blocks.
 Creating multiple .test files.
 Testing with various new test-cases.
 Optimizing re-usability in coponents.
