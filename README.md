@@ -23,7 +23,7 @@
 - Creating multiple .test files.
 - Testing with various new test-cases.
 - Optimizing re-usability in coponents.
-Removing inexecutable cases.
+- Removing inexecutable cases.
 Debugging issues.
 Optimizing time-complexity.
 - Developing special flow.
