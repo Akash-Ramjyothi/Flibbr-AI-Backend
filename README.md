@@ -24,7 +24,7 @@
 - Testing with various new test-cases.
 - Optimizing re-usability in coponents.
 - Removing inexecutable cases.
-Debugging issues.
+- Debugging issues.
 Optimizing time-complexity.
 - Developing special flow.
 - Removing inexecutable cases.
