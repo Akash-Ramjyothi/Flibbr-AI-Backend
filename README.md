@@ -25,6 +25,6 @@
 - Optimizing re-usability in coponents.
 - Removing inexecutable cases.
 - Debugging issues.
-Optimizing time-complexity.
+- Optimizing time-complexity.
 - Developing special flow.
 - Removing inexecutable cases.
