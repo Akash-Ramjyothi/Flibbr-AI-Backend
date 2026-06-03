@@ -1,26 +1,489 @@
-model User {
-  user_id   Int      @id
-  username  String   @unique
-  password  String
-  chats     Chat[]
+// Enhanced Prisma Schema for Chat Application
+generator client {
+  provider = "prisma-client-js"
 }
+
+datasource db {
+  provider = "postgresql" // or "mysql" or "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== USER MANAGEMENT ====================
+
+model User {
+  user_id          String            @id @default(cuid())
+  email            String            @unique
+  username         String            @unique
+  password_hash    String            // Store hashed passwords only
+  password_salt    String?           // For additional security
+  full_name        String?
+  avatar_url       String?
+  role             UserRole          @default(USER)
+  status           UserStatus        @default(ACTIVE)
+  email_verified   Boolean           @default(false)
+  last_login_at    DateTime?
+  last_login_ip    String?           @db.Inet
+  preferences      Json?             // JSON field for user preferences
+  metadata         Json?             // Additional user metadata
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
+  deleted_at       DateTime?         // Soft delete
+  
+  // Relations
+  chats            Chat[]
+  messages         Message[]
+  sessions         Session[]
+  attachments      Attachment[]
+  reactions        Reaction[]
+  ratings          Rating[]
+  audit_logs       AuditLog[]
+  api_keys         ApiKey[]
+  usage_records    UsageRecord[]
+  notifications    Notification[]
+  saved_prompts    SavedPrompt[]
+  
+  @@index([email])
+  @@index([username])
+  @@index([status])
+  @@index([deleted_at])
+}
+
+model Session {
+  session_id    String   @id @default(cuid())
+  user_id       String
+  token         String   @unique
+  ip_address    String?  @db.Inet
+  user_agent    String?
+  expires_at    DateTime
+  created_at    DateTime @default(now())
+  last_activity DateTime @default(now())
+  is_revoked    Boolean  @default(false)
+  
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  
+  @@index([token])
+  @@index([user_id])
+  @@index([expires_at])
+}
+
+// ==================== CHAT MANAGEMENT ====================
 
 model Chat {
-  chat_id    Int       @id
-  user_id    Int
-  title      String
-  created_at DateTime  @default(now())
-  messages   Message[]
+  chat_id          String            @id @default(cuid())
+  user_id          String
+  title            String
+  summary          String?           @db.Text  // AI-generated conversation summary
+  category         ChatCategory?     // Categorization for organization
+  tags             String[]          // Array of tags for search/filtering
+  message_count    Int               @default(0)
+  total_tokens     Int               @default(0) // Total tokens used in this chat
+  is_archived      Boolean           @default(false)
+  is_pinned        Boolean           @default(false)
+  folder_id        String?           // For chat organization
+  color            String?           // Custom color for chat
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
+  last_message_at  DateTime          @default(now())
+  deleted_at       DateTime?         // Soft delete
+  
+  // Relations
+  user             User              @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  folder           ChatFolder?       @relation(fields: [folder_id], references: [folder_id])
+  messages         Message[]
+  shared_links     SharedChatLink[]
+  exports          ChatExport[]
+  
+  @@index([user_id])
+  @@index([category])
+  @@index([is_archived])
+  @@index([created_at])
+  @@index([last_message_at])
+  @@index([user_id, updated_at])
 }
+
+model ChatFolder {
+  folder_id     String   @id @default(cuid())
+  user_id       String
+  name          String
+  parent_id     String?  // Nested folders
+  order         Int      @default(0)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  
+  user         User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  parent       ChatFolder?    @relation("FolderHierarchy", fields: [parent_id], references: [folder_id])
+  children     ChatFolder[]   @relation("FolderHierarchy")
+  chats        Chat[]
+  
+  @@unique([user_id, name])
+  @@index([user_id, parent_id])
+}
+
+// ==================== MESSAGE MANAGEMENT ====================
 
 model Message {
-  mesg_id Int    @id
-  chat_id Int
-  message String
-  role    Role
+  mesg_id            String            @id @default(cuid())
+  chat_id            String
+  parent_message_id  String?           // For message threading
+  user_id            String
+  message            String            @db.Text
+  message_html       String?           @db.Text  // Rendered HTML version
+  role               MessageRole
+  status             MessageStatus     @default(SENT)
+  tokens_used        Int?              // Number of tokens in this message
+  processing_time_ms Int?              // Time taken to generate response
+  character_count    Int               @default(0)
+  word_count         Int               @default(0)
+  model_used         String?           // Which AI model was used
+  temperature        Float?            // Model temperature setting used
+  metadata           Json?             // Additional metadata (sources, etc.)
+  created_at         DateTime          @default(now())
+  edited_at          DateTime?
+  deleted_at         DateTime?         // Soft delete
+  
+  // Relations
+  chat               Chat              @relation(fields: [chat_id], references: [chat_id], onDelete: Cascade)
+  user               User              @relation(fields: [user_id], references: [user_id])
+  parent             Message?          @relation("MessageThread", fields: [parent_message_id], references: [mesg_id])
+  replies            Message[]         @relation("MessageThread")
+  attachments        Attachment[]
+  reactions          Reaction[]
+  ratings            Rating[]
+  edit_history       MessageEdit[]
+  read_receipts      ReadReceipt[]
+  
+  @@index([chat_id, created_at])
+  @@index([user_id])
+  @@index([parent_message_id])
+  @@index([status])
+  @@index([role])
+  @@index([chat_id, role, created_at])
 }
 
-enum Role {
-  user
-  bot
+model MessageEdit {
+  edit_id        String   @id @default(cuid())
+  message_id     String
+  previous_text  String   @db.Text
+  edited_by      String   // User ID who made the edit
+  edited_at      DateTime @default(now())
+  
+  message Message @relation(fields: [message_id], references: [mesg_id], onDelete: Cascade)
+  
+  @@index([message_id, edited_at])
 }
+
+model ReadReceipt {
+  receipt_id   String   @id @default(cuid())
+  message_id   String
+  user_id      String
+  read_at      DateTime @default(now())
+  
+  message Message @relation(fields: [message_id], references: [mesg_id], onDelete: Cascade)
+  user    User    @relation(fields: [user_id], references: [user_id])
+  
+  @@unique([message_id, user_id])
+}
+
+// ==================== ATTACHMENTS & FILES ====================
+
+model Attachment {
+  attachment_id   String         @id @default(cuid())
+  message_id      String
+  user_id         String
+  file_name       String
+  file_size       Int            // Size in bytes
+  file_type       String         // MIME type
+  file_url        String
+  storage_path    String
+  thumbnail_url   String?
+  width           Int?           // For images
+  height          Int?           // For images
+  duration_sec    Int?           // For audio/video
+  created_at      DateTime       @default(now())
+  
+  message Message @relation(fields: [message_id], references: [mesg_id], onDelete: Cascade)
+  user    User    @relation(fields: [user_id], references: [user_id])
+  
+  @@index([message_id])
+  @@index([user_id])
+}
+
+// ==================== USER INTERACTION & FEEDBACK ====================
+
+model Reaction {
+  reaction_id  String   @id @default(cuid())
+  message_id   String
+  user_id      String
+  emoji        String   // Unicode emoji or custom reaction ID
+  created_at   DateTime @default(now())
+  
+  message Message @relation(fields: [message_id], references: [mesg_id], onDelete: Cascade)
+  user    User    @relation(fields: [user_id], references: [user_id])
+  
+  @@unique([message_id, user_id, emoji])
+  @@index([message_id, created_at])
+}
+
+model Rating {
+  rating_id    String    @id @default(cuid())
+  message_id   String
+  user_id      String
+  rating       Int       // 1-5 scale
+  feedback     String?   @db.Text  // Optional text feedback
+  categories   Json?     // Rating breakdown (accuracy, helpfulness, etc.)
+  created_at   DateTime  @default(now())
+  
+  message Message @relation(fields: [message_id], references: [mesg_id], onDelete: Cascade)
+  user    User    @relation(fields: [user_id], references: [user_id])
+  
+  @@unique([message_id, user_id])
+  @@index([message_id, rating])
+}
+
+// ==================== API & INTEGRATIONS ====================
+
+model ApiKey {
+  key_id       String    @id @default(cuid())
+  user_id      String
+  key_name     String
+  key_hash     String    @unique  // Store hashed API key
+  permissions  Json?              // API permission scopes
+  last_used_at DateTime?
+  expires_at   DateTime?
+  is_revoked   Boolean   @default(false)
+  created_at   DateTime  @default(now())
+  
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@index([key_hash])
+}
+
+model UsageRecord {
+  record_id    String   @id @default(cuid())
+  user_id      String
+  endpoint     String   // API endpoint called
+  method       String   // HTTP method
+  status_code  Int
+  response_time_ms Int
+  tokens_used  Int?
+  cost_usd     Float?   // Cost for API usage
+  ip_address   String?  @db.Inet
+  user_agent   String?
+  created_at   DateTime @default(now())
+  
+  user User @relation(fields: [user_id], references: [user_id])
+  
+  @@index([user_id, created_at])
+  @@index([endpoint, created_at])
+}
+
+// ==================== SHARING & EXPORTS ====================
+
+model SharedChatLink {
+  share_id     String   @id @default(cuid())
+  chat_id      String
+  user_id      String
+  share_token  String   @unique
+  is_public    Boolean  @default(false)
+  allow_comments Boolean @default(false)
+  expires_at   DateTime?
+  view_count   Int      @default(0)
+  created_at   DateTime @default(now())
+  
+  chat Chat @relation(fields: [chat_id], references: [chat_id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [user_id])
+  
+  @@index([share_token])
+  @@index([chat_id])
+}
+
+model ChatExport {
+  export_id    String   @id @default(cuid())
+  chat_id      String
+  user_id      String
+  format       ExportFormat
+  file_url     String
+  file_size    Int
+  include_metadata Boolean @default(true)
+  created_at   DateTime @default(now())
+  
+  chat Chat @relation(fields: [chat_id], references: [chat_id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [user_id])
+  
+  @@index([chat_id])
+  @@index([user_id, created_at])
+}
+
+// ==================== NOTIFICATIONS ====================
+
+model Notification {
+  notification_id String   @id @default(cuid())
+  user_id         String
+  type            NotificationType
+  title           String
+  body            String   @db.Text
+  data            Json?    // Additional notification data
+  is_read         Boolean  @default(false)
+  is_archived     Boolean  @default(false)
+  created_at      DateTime @default(now())
+  read_at         DateTime?
+  
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  
+  @@index([user_id, is_read, created_at])
+  @@index([user_id, created_at(sort: Desc)])
+}
+
+// ==================== SAVED PROMPTS ====================
+
+model SavedPrompt {
+  prompt_id    String   @id @default(cuid())
+  user_id      String
+  title        String
+  content      String   @db.Text
+  description  String?
+  category     String?
+  tags         String[]
+  is_public    Boolean  @default(false)
+  usage_count  Int      @default(0)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@index([user_id, is_public])
+  @@index([category])
+}
+
+// ==================== AUDIT & LOGGING ====================
+
+model AuditLog {
+  log_id       String   @id @default(cuid())
+  user_id      String
+  action       String
+  entity_type  String   // Chat, Message, User, etc.
+  entity_id    String
+  old_values   Json?
+  new_values   Json?
+  ip_address   String?  @db.Inet
+  user_agent   String?
+  created_at   DateTime @default(now())
+  
+  user User @relation(fields: [user_id], references: [user_id])
+  
+  @@index([user_id, created_at])
+  @@index([entity_type, entity_id])
+  @@index([action, created_at])
+}
+
+// ==================== SYSTEM CONFIGURATION ====================
+
+model SystemConfig {
+  config_key   String   @id
+  config_value Json
+  description  String?
+  updated_by   String?
+  updated_at   DateTime @updatedAt
+  created_at   DateTime @default(now())
+}
+
+model RateLimit {
+  limit_id     String   @id @default(cuid())
+  user_id      String?
+  endpoint     String
+  window_ms    Int      // Time window in milliseconds
+  max_requests Int
+  current_count Int     @default(0)
+  window_start DateTime @default(now())
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  
+  user User? @relation(fields: [user_id], references: [user_id])
+  
+  @@unique([user_id, endpoint, window_start])
+  @@index([user_id, endpoint, window_start])
+}
+
+// ==================== ENUMS ====================
+
+enum UserRole {
+  USER
+  PREMIUM
+  MODERATOR
+  ADMIN
+  SYSTEM
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  DELETED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+  TOOL
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+  EDITED
+  DELETED
+  FAILED
+  PENDING
+}
+
+enum ChatCategory {
+  GENERAL
+  CODING
+  WRITING
+  ANALYSIS
+  CREATIVE
+  EDUCATION
+  BUSINESS
+  SUPPORT
+}
+
+enum ExportFormat {
+  JSON
+  MARKDOWN
+  HTML
+  PDF
+  TXT
+}
+
+enum NotificationType {
+  MESSAGE
+  MENTION
+  SHARE
+  EXPORT_READY
+  SYSTEM
+  REMINDER
+  FEATURE_UPDATE
+}
+
+// ==================== VIEWS (for reporting) ====================
+
+// Note: Prisma doesn't support views directly, but you can create them via migrations
+// Example view for user engagement metrics:
+// CREATE VIEW user_engagement AS
+// SELECT u.user_id, u.username, COUNT(DISTINCT c.chat_id) as chat_count, 
+//        COUNT(m.mesg_id) as message_count, MAX(m.created_at) as last_activity
+// FROM users u
+// LEFT JOIN chats c ON u.user_id = c.user_id AND c.deleted_at IS NULL
+// LEFT JOIN messages m ON c.chat_id = m.chat_id
+// GROUP BY u.user_id, u.username;
+
+// Example view for daily active users:
+// CREATE VIEW daily_active_users AS
+// SELECT DATE(created_at) as date, COUNT(DISTINCT user_id) as active_users
+// FROM sessions
+// WHERE created_at >= NOW() - INTERVAL '30 days'
+// GROUP BY DATE(created_at);
