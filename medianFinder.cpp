@@ -1,59 +1,90 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define endl '\n'
-#define int long long
-
-const int MOD = 1e9 + 7;
-const int INF = LLONG_MAX >> 1;
-
 class MedianFinder {
 private:
-    priority_queue<int> maxHeap; // max heap for the lower half
-    priority_queue<int, vector<int>, greater<int>> minHeap; // min heap for the upper half
+    priority_queue<long long> lower; // Max Heap
+    priority_queue<long long,
+                   vector<long long>,
+                   greater<long long>> upper; // Min Heap
 
-public:
-    void addNum(int num) {
-        if (maxHeap.empty() || num <= maxHeap.top()) {
-            maxHeap.push(num);
-        } else {
-            minHeap.push(num);
+    void rebalance() {
+        if (lower.size() > upper.size() + 1) {
+            upper.push(lower.top());
+            lower.pop();
         }
-
-        // Balance the heaps
-        if (maxHeap.size() > minHeap.size() + 1) {
-            minHeap.push(maxHeap.top());
-            maxHeap.pop();
-        } else if (minHeap.size() > maxHeap.size()) {
-            maxHeap.push(minHeap.top());
-            minHeap.pop();
+        else if (upper.size() > lower.size()) {
+            lower.push(upper.top());
+            upper.pop();
         }
     }
 
-    double findMedian() {
-        if (maxHeap.size() > minHeap.size()) {
-            return maxHeap.top();
+public:
+    MedianFinder() = default;
+
+    void addNum(long long num) {
+        if (lower.empty() || num <= lower.top()) {
+            lower.push(num);
         } else {
-            return (maxHeap.top() + minHeap.top()) / 2.0;
+            upper.push(num);
         }
+
+        rebalance();
+    }
+
+    double getMedian() const {
+        if (empty()) {
+            throw runtime_error("No elements present");
+        }
+
+        if (lower.size() == upper.size()) {
+            return (lower.top() + upper.top()) / 2.0;
+        }
+
+        return lower.top();
+    }
+
+    size_t size() const {
+        return lower.size() + upper.size();
+    }
+
+    bool empty() const {
+        return size() == 0;
+    }
+
+    void printState() const {
+        cout << "\nCurrent Median: " << getMedian() << '\n';
+        cout << "Elements Processed: " << size() << '\n';
     }
 };
 
 int main() {
-    MedianFinder medianFinder;
-    int n, num;
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
 
-    cout << "Enter the number of elements: ";
+    MedianFinder mf;
+
+    int n;
+    cout << "Enter number of elements: ";
     cin >> n;
 
-    cout << "Enter the elements:\n";
-    for (int i = 0; i < n; ++i) {
-        cin >> num;
-        medianFinder.addNum(num);
+    cout << "\nEnter elements:\n";
+
+    for (int i = 0; i < n; i++) {
+        long long x;
+        cin >> x;
+
+        mf.addNum(x);
+
+        cout << "After inserting " << x
+             << ", median = "
+             << mf.getMedian()
+             << '\n';
     }
 
-    double median = medianFinder.findMedian();
-    cout << "The median is: " << median << endl;
+    cout << "\nFinal Median = "
+         << mf.getMedian()
+         << '\n';
 
     return 0;
 }
